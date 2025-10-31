@@ -1,0 +1,12 @@
+// loadEnv.js
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Load .env once globally
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+console.log("🌍 Environment loaded from .env");
