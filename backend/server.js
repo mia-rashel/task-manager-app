@@ -14,7 +14,7 @@ app.use("/tasks", taskRoutes);
 
 app.get("/", (req, res) => res.send("Task Manager Backend is running ✅"));
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
