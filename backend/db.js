@@ -13,6 +13,11 @@ if (typeof dbURL !== "string") {
 
 const pool = new Pool({
   connectionString: dbURL,
+    ssl: {
+    ca: fs.readFileSync(
+      path.join(__dirname, "certs", "rds-ca.pem")
+    ).toString()
+  }
 });
 
 export default pool;
