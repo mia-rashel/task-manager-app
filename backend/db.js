@@ -26,7 +26,7 @@ let sslConfig = false;
 const certPath = path.join(__dirname, "certs", "rds-ca.pem");
 if (fs.existsSync(certPath)) {
   sslConfig = {
-    rejectUnauthorized: false,
+    rejectUnauthorized: true,
     ca: fs.readFileSync(certPath).toString(),
   };
   console.log("✅ Loaded RDS SSL certificate.");
