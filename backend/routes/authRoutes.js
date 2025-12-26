@@ -59,36 +59,40 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 router.post("/google", async (req, res) => {
-  const { token } = req.body;
-
   try {
-    // Verify Firebase token
+    const { token } = req.body;
+
+    // ✅ Verify Firebase ID token
     const decoded = await admin.auth().verifyIdToken(token);
     const { email, name, uid } = decoded;
 
-    // Check if user exists
+    // 🔍 Check if user exists in your DB
     let user = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
 
     if (user.rows.length === 0) {
-      // Create new user if doesn't exist
+      // 🆕 Create new user if not exists
       user = await pool.query(
-        "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
-        [name, email, "GOOGLE_USER"]
+        "INSERT INTO users (name, email, google_uid) VALUES ($1, $2, $3) RETURNING *",
+        [name, email, uid]
       );
+    } else {
+      user = user.rows[0];
     }
 
+    // 🔑 Generate your own JWT for your app
     const appToken = jwt.sign(
-      { id: user.rows[0].id, email: user.rows[0].email },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    res.json({ appToken, user: user.rows[0] });
-  } catch (error) {
-    console.error("Google auth error:", error);
-    res.status(401).json({ message: "Invalid Google token" });
+    res.json({ token: appToken, user });
+  } catch (err) {
+    console.error("Google Auth Error:", err);
+    res.status(401).json({ error: "Invalid or expired Google token" });
   }
 });
+
 
 
 
