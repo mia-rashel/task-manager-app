@@ -58,6 +58,38 @@ router.get("/me", verifyToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user info", details: err.message });
   }
 });
+router.post("/google", async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    // Verify Firebase token
+    const decoded = await admin.auth().verifyIdToken(token);
+    const { email, name, uid } = decoded;
+
+    // Check if user exists
+    let user = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
+
+    if (user.rows.length === 0) {
+      // Create new user if doesn't exist
+      user = await pool.query(
+        "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
+        [name, email, "GOOGLE_USER"]
+      );
+    }
+
+    const appToken = jwt.sign(
+      { id: user.rows[0].id, email: user.rows[0].email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({ appToken, user: user.rows[0] });
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(401).json({ message: "Invalid Google token" });
+  }
+});
+
 
 
 export default router;
