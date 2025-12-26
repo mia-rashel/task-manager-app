@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../db.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import admin from "../firebaseAdmin.js";
 
 const router = express.Router();
 
